@@ -43,15 +43,15 @@ jobs:
         working-directory: /root
 
       - name: cmake
-        run: cmake -G Ninja ../foundationdb
+        run: source /opt/rh/devtoolset-8/enable && cmake -G Ninja ../foundationdb
         working-directory: /root/build
         
       - name: ninja
-        run: ninja -j1
+        run: source /opt/rh/devtoolset-8/enable && ninja -j1
         working-directory: /root/build
         
       - name: cpack
-        run: cpack -G TGZ
+        run: source /opt/rh/devtoolset-8/enable && cpack -G TGZ
         working-directory: /root/build
         
       - name: ls
