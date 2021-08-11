@@ -1,0 +1,59 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Build branches
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    container: foundationdb/build:centos7-latest
+
+    strategy:
+      matrix:
+        branch: ["release-7.0", "release-6.3", "master"]
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+        
+      - name: git clone
+        run: git clone https://github.com/apple/foundationdb.git
+        working-directory: /root
+        
+      - name: git checkout
+        run: git checkout $FDB_BRANCH
+        working-directory: /root/foundationdb
+        env:
+          FDB_BRANCH: ${{ matrix.branch }}
+        
+      - name: mkdir build
+        run: mkdir build
+        working-directory: /root
+
+      - name: cmake
+        run: cmake -G Ninja ../foundationdb
+        working-directory: /root/build
+        
+      - name: ninja
+        run: ninja -j1
+        working-directory: /root/build
+        
+      - name: cpack
+        run: cpack -G TGZ
+        working-directory: /root/build
+        
+      - name: ls
+        run: find . | grep ".tar"
+        working-directory: /root/build
