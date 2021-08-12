@@ -27,7 +27,6 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-        
       - name: git clone
         run: git clone https://github.com/apple/foundationdb.git
         working-directory: /root
@@ -43,17 +42,33 @@ jobs:
         working-directory: /root
 
       - name: cmake
-        run: source /opt/rh/devtoolset-8/enable && cmake -G Ninja ../foundationdb
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python36/enable && cmake -G Ninja ../foundationdb
         working-directory: /root/build
         
       - name: ninja
-        run: source /opt/rh/devtoolset-8/enable && ninja -j1
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python36/enable && ninja -j1
         working-directory: /root/build
         
       - name: cpack
-        run: source /opt/rh/devtoolset-8/enable && cpack -G TGZ
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python36/enable && cpack -G TGZ
         working-directory: /root/build
+      
+      - name: cpack
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python36/enable && cpack -G DEB
+        working-directory: /root/build
+      
+      - name: build doc
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python36/enable &&  ninja documentation/package_html
+        working-directory: /root/build
+      
+      - name: list packages folder
+        run: find .
+        working-directory: /root/build/packages
         
-      - name: ls
-        run: find . | grep ".tar"
-        working-directory: /root/build
+      - name: upload packages
+        uses: actions/upload-artifact@v2
+        with:
+          path: |
+           /root/build/packages/*.tar.gz
+           /root/build/packages/*.deb
+          if-no-files-found: error
