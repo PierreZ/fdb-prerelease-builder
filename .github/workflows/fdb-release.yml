@@ -23,7 +23,7 @@ jobs:
 
     strategy:
       matrix:
-        branch: ["release-7.0", "release-6.3", "master"]
+        branch: ["release-7.0", "release-6.3"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -65,10 +65,38 @@ jobs:
         run: find .
         working-directory: /root/build/packages
         
-      - name: upload packages
+      - name: upload foundationdb-clients deb
         uses: actions/upload-artifact@v2
         with:
-          path: |
-           /root/build/packages/*.tar.gz
-           /root/build/packages/*.deb
+          name: foundationdb-clients_${{ matrix.branch }}.PRERELEASE_amd64.deb
+          path: /root/build/packages/foundationdb-clients*.PRERELEASE_amd64.deb
+          if-no-files-found: error
+      
+      - name: upload foundationdb-clients targz
+        uses: actions/upload-artifact@v2
+        with:
+          name: foundationdb-clients_${{ matrix.branch }}.PRERELEASE.x86_64.tar.gz
+          path: /root/build/packages/foundationdb-clients*.PRERELEASE.x86_64.tar.gz
+          if-no-files-found: error
+
+      - name: upload foundationdb-server deb
+        uses: actions/upload-artifact@v2
+        with:
+          name: foundationdb-server_${{ matrix.branch }}.PRERELEASE_amd64.deb
+          path: /root/build/packages/foundationdb-server*.PRERELEASE_amd64.deb
+          if-no-files-found: error
+      
+      - name: upload foundationdb-server targz
+        uses: actions/upload-artifact@v2
+        with:
+          name: foundationdb-server_${{ matrix.branch }}.PRERELEASE.x86_64.tar.gz
+          path: /root/build/packages/foundationdb-server*.PRERELEASE.x86_64.tar.gz
+          if-no-files-found: error
+
+      
+      - name: upload doc
+        uses: actions/upload-artifact@v2
+        with:
+          name: foundationdb-docs_${{ matrix.branch }}.PRERELEASE.tar.gz
+          path: /root/build/packages/foundationdb-docs-*.tar.gz
           if-no-files-found: error
