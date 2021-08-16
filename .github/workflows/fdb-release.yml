@@ -9,13 +9,17 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  # “At 05:00 on Sunday.”
+  # https://crontab.guru/#0_5_*_*_0
+  schedule:
+  - cron: "0 5 * * 0"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
+  # Building FDB
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -71,6 +75,7 @@ jobs:
           name: foundationdb-clients_${{ matrix.branch }}.PRERELEASE_amd64.deb
           path: /root/build/packages/foundationdb-clients*.PRERELEASE_amd64.deb
           if-no-files-found: error
+          retention-days: 10
       
       - name: upload foundationdb-clients targz
         uses: actions/upload-artifact@v2
@@ -78,6 +83,7 @@ jobs:
           name: foundationdb-clients_${{ matrix.branch }}.PRERELEASE.x86_64.tar.gz
           path: /root/build/packages/foundationdb-clients*.PRERELEASE.x86_64.tar.gz
           if-no-files-found: error
+          retention-days: 10
 
       - name: upload foundationdb-server deb
         uses: actions/upload-artifact@v2
@@ -85,6 +91,7 @@ jobs:
           name: foundationdb-server_${{ matrix.branch }}.PRERELEASE_amd64.deb
           path: /root/build/packages/foundationdb-server*.PRERELEASE_amd64.deb
           if-no-files-found: error
+          retention-days: 10
       
       - name: upload foundationdb-server targz
         uses: actions/upload-artifact@v2
@@ -92,6 +99,15 @@ jobs:
           name: foundationdb-server_${{ matrix.branch }}.PRERELEASE.x86_64.tar.gz
           path: /root/build/packages/foundationdb-server*.PRERELEASE.x86_64.tar.gz
           if-no-files-found: error
+          retention-days: 10
+      
+      - name: upload docker files
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker_release_${{ matrix.branch }}
+          path: /root/build/packages/docker/release
+          if-no-files-found: error
+          retention-days: 1
 
       
       - name: upload doc
@@ -100,3 +116,67 @@ jobs:
           name: foundationdb-docs_${{ matrix.branch }}.PRERELEASE.tar.gz
           path: /root/build/packages/foundationdb-docs-*.tar.gz
           if-no-files-found: error
+          retention-days: 10
+
+  # Second job: building docker thanks to the artifact uploaded
+  build-docker: 
+    needs: build
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        branch: ["release-7.0", "release-6.3"]
+
+    steps:
+    - uses: actions/checkout@v2 
+
+    - name: download server artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: foundationdb-server_${{ matrix.branch }}.PRERELEASE_amd64.deb
+    
+    - name: download client artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: foundationdb-clients_${{ matrix.branch }}.PRERELEASE_amd64.deb
+    
+    - name: create release folder 
+      run: pwd && mkdir release
+    
+    - name: list
+      run: pwd && find .
+    
+    - name: download docker artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: docker_release_${{ matrix.branch }}
+        path: "/home/runner/work/fdb-prerelease-builder/fdb-prerelease-builder/release"
+      
+    - name: list result
+      run: pwd && find .
+
+    - name: mv deb
+      run: mv *.deb release/
+     
+    - name: build docker image
+      id: docker_build
+      uses: docker/build-push-action@v2
+      if: github.event_name == 'pull_request'
+      with:
+        context: ./release
+        file: ./Dockerfile
+        push: false
+    
+    - name: build and push docker image
+      id: docker_push
+      uses: docker/build-push-action@v2
+      if: github.event_name != 'pull_request'
+      with:
+        context: ./release
+        file: ./Dockerfile
+        push: true
+        registry: ghcr.io
+        username: PierreZ
+        password: ${{ secrets.GITHUB_TOKEN }}
+        tags: pierrez/fdb-prerelease:${{ matrix.branch }}
