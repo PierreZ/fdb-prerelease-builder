@@ -10,9 +10,8 @@ The workflow is building every week:
 
 * the documentation,
 * server and client packages,
-* a derived Docker image.
 
-|             	| DEB 	| TAR.GZ 	| Docker 	| Doc 	|
-|-------------	|-----	|--------	|--------	|-----	|
-| Release 6.3 	| ✅   	| ✅      	| ✅       	| ✅   	|
-| Release 7.0 	| ✅   	| ✅      	| ✅     	| ✅   	|
+|             	| DEB 	| TAR.GZ | Doc 	|
+|-------------	|-----	|--------|-----	|
+| Release 6.3 	| ✅   	| ✅     | ✅ 	|
+| Release 7.0 	| ✅   	| ✅     | ✅ 	|
