@@ -46,23 +46,23 @@ jobs:
         working-directory: /root
 
       - name: cmake
-        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python36/enable && cmake -G Ninja ../foundationdb
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && cmake -G Ninja ../foundationdb
         working-directory: /root/build
         
       - name: ninja
-        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python36/enable && ninja -j1
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja -j1
         working-directory: /root/build
         
       - name: cpack
-        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python36/enable && cpack -G TGZ
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && cpack -G TGZ
         working-directory: /root/build
       
       - name: cpack
-        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python36/enable && cpack -G DEB
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && cpack -G DEB
         working-directory: /root/build
       
       - name: build doc
-        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python36/enable &&  ninja documentation/package_html
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable &&  ninja documentation/package_html
         working-directory: /root/build
       
       - name: list packages folder
