@@ -17,6 +17,11 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+# concurrency to cancel any in-progress job or run
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # Building FDB
@@ -64,7 +69,11 @@ jobs:
       - name: build doc
         run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable &&  ninja documentation/package_html
         working-directory: /root/build
-      
+
+      - name: build joshua correctness
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja package_tests
+        working-directory: /root/build
+
       - name: list packages folder
         run: find .
         working-directory: /root/build/packages
@@ -106,5 +115,13 @@ jobs:
         with:
           name: foundationdb-docs_${{ matrix.branch }}.PRERELEASE.tar.gz
           path: /root/build/packages/foundationdb-docs-*.tar.gz
+          if-no-files-found: error
+          retention-days: 10
+
+      - name: upload joshua
+        uses: actions/upload-artifact@v2
+        with:
+          name: foundationdb-correctness_${{ matrix.branch }}.PRERELEASE.tar.gz
+          path: /root/build/packages/correctness-*.tar.gz
           if-no-files-found: error
           retention-days: 10
