@@ -34,58 +34,74 @@ jobs:
       - name: git clone
         run: git clone https://github.com/apple/foundationdb.git
         working-directory: /root
-        
+
       - name: git checkout
         run: git checkout $FDB_BRANCH
         working-directory: /root/foundationdb
         env:
           FDB_BRANCH: ${{ matrix.branch }}
-        
-      - name: mkdir build
-        run: mkdir build
+
+      - name: mkdir build_output
+        run: mkdir build_output
         working-directory: /root
 
       - name: cmake
         run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && cmake -G Ninja ../foundationdb
-        working-directory: /root/build
-        
+        working-directory: /root/build_output
+
       - name: ninja
         run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja -j1
-        working-directory: /root/build
-        
-      - name: cpack
+        working-directory: /root/build_output
+
+      - name: cpack TGZ
         run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && cpack -G TGZ
-        working-directory: /root/build
-      
-      - name: cpack
+        working-directory: /root/build_output
+
+      - name: cpack DEB
         run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && cpack -G DEB
-        working-directory: /root/build
-      
+        working-directory: /root/build_output
+
       - name: build doc
         run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable &&  ninja documentation/package_html
-        working-directory: /root/build
+        working-directory: /root/build_output
 
       - name: build joshua correctness
         run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja package_tests
-        working-directory: /root/build
+        working-directory: /root/build_output
+
+      - name: build Bindingtester
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja bindingtester
+        working-directory: /root/build_output
+
+      - name: change tag for Docker
+        # transform tag_base="foundationdb/" in tag_base="pierrez"
+        run: sed -i 's/"foundationdb\/"/"pierrez"/' build-images.sh
+        working-directory: /root/foundationdb/packaging/docker
+
+      - name: build docker images
+        run: ./build-images.sh
+        working-directory: /root/foundationdb/packaging/docker
+
+      - name: list docker images
+        run: docker images
 
       - name: list packages folder
         run: find .
-        working-directory: /root/build/packages
-        
+        working-directory: /root/build_output/packages
+
       - name: upload foundationdb-clients deb
         uses: actions/upload-artifact@v2
         with:
           name: foundationdb-clients_${{ matrix.branch }}.PRERELEASE_amd64.deb
-          path: /root/build/packages/foundationdb-clients*.PRERELEASE_amd64.deb
+          path: /root/build_output/packages/foundationdb-clients*.PRERELEASE_amd64.deb
           if-no-files-found: error
           retention-days: 10
-      
+
       - name: upload foundationdb-clients targz
         uses: actions/upload-artifact@v2
         with:
           name: foundationdb-clients_${{ matrix.branch }}.PRERELEASE.x86_64.tar.gz
-          path: /root/build/packages/foundationdb-clients*.PRERELEASE.x86_64.tar.gz
+          path: /root/build_output/packages/foundationdb-clients*.PRERELEASE.x86_64.tar.gz
           if-no-files-found: error
           retention-days: 10
 
@@ -93,30 +109,45 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: foundationdb-server_${{ matrix.branch }}.PRERELEASE_amd64.deb
-          path: /root/build/packages/foundationdb-server*.PRERELEASE_amd64.deb
+          path: /root/build_output/packages/foundationdb-server*.PRERELEASE_amd64.deb
           if-no-files-found: error
           retention-days: 10
-      
+
       - name: upload foundationdb-server targz
         uses: actions/upload-artifact@v2
         with:
           name: foundationdb-server_${{ matrix.branch }}.PRERELEASE.x86_64.tar.gz
-          path: /root/build/packages/foundationdb-server*.PRERELEASE.x86_64.tar.gz
+          path: /root/build_output/packages/foundationdb-server*.PRERELEASE.x86_64.tar.gz
           if-no-files-found: error
           retention-days: 10
-       
+
       - name: upload doc
         uses: actions/upload-artifact@v2
         with:
           name: foundationdb-docs_${{ matrix.branch }}.PRERELEASE.tar.gz
-          path: /root/build/packages/foundationdb-docs-*.tar.gz
+          path: /root/build_output/packages/foundationdb-docs-*.tar.gz
           if-no-files-found: error
           retention-days: 10
 
-      - name: upload joshua
+      - name: upload correctness
         uses: actions/upload-artifact@v2
         with:
           name: foundationdb-correctness_${{ matrix.branch }}.PRERELEASE.tar.gz
-          path: /root/build/packages/correctness-*.tar.gz
+          path: /root/build_output/packages/correctness-*.tar.gz
           if-no-files-found: error
           retention-days: 10
+
+      - name: upload bindingtester
+        uses: actions/upload-artifact@v2
+        with:
+          name: bindingtester_${{ matrix.branch }}.PRERELEASE.tar.gz
+          path: /root/build_output/packages/bindingtester-*.tar.gz
+          if-no-files-found: error
+          retention-days: 10
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
