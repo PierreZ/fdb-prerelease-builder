@@ -81,6 +81,8 @@ jobs:
       - name: build docker images
         run: ./build-images.sh
         working-directory: /root/foundationdb/packaging/docker
+        env:
+          TERM: xterm-color
 
       - name: list docker images
         run: docker images
