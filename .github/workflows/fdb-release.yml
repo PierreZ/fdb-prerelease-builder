@@ -74,8 +74,69 @@ jobs:
         working-directory: /root/build_output
 
       - name: change tag for Docker
-        # transform tag_base="foundationdb/" in tag_base="pierrez"
-        run: sed -i 's/"foundationdb\/"/"pierrez"/' build-images.sh
+        # transform tag_base="foundationdb/" in tag_base="ghcr.io/pierrez"
+        run: sed -i 's#"foundationdb/"#"ghcr.io/pierrez/"#' build-images.sh
+        working-directory: /root/foundationdb/packaging/docker
+
+      - name: enable docker push on build-images.sh if needed
+        run: sed -i 's#push_docker_images="false"#push_docker_images="true"#' build-images.sh
+        working-directory: /root/foundationdb/packaging/docker
+        # if: github.event_name != 'pull_request'
+
+      - name: Login to GitHub Container Registry if needed
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        # if: github.event_name != 'pull_request'
+
+      # reason: remove required aws call even if we are not using aws
+      - name: comment aws calls
+        run: sed -i 's/aws_account_id/# aws_account_id/' build-images.sh
+        working-directory: /root/foundationdb/packaging/docker
+
+      # reason: remove warning
+      - name: comment exit 1
+        run: sed -i 's/exit 1$/# exit 1/' build-images.sh
+        working-directory: /root/foundationdb/packaging/docker
+
+      # reason: fix path
+      - name: change build_output for Docker
+        run: sed -i 's#${script_dir}/../../build_output#/root/build_output#' ./build-images.sh
+        working-directory: /root/foundationdb/packaging/docker
+
+      # reason: avoid pulling release from official website and pull local builds
+      - name: change to unstripped_local for Docker
+        run: sed -i 's#stripped_binaries_and_from_where="stripped_local"#stripped_binaries_and_from_where="unstripped_local"#' ./build-images.sh
+        working-directory: /root/foundationdb/packaging/docker
+
+      - name: git clone fdb@master
+        run: git clone https://github.com/apple/foundationdb.git
+        working-directory: /tmp
+
+      # reason: release branches does not have fdbkubernetesmonitor
+      - name: copy fdbkubernetesmonitor@master to right folder
+        run: cp -r /tmp/foundationdb/fdbkubernetesmonitor /root/foundationdb/packaging/docker/fdbkubernetesmonitor
+        working-directory: /root/foundationdb/packaging/docker
+
+
+      # reason: https://github.com/FoundationDB/YCSB.git not available for mortals
+      - name: remove ycsb from image list
+        run: sed -i "s/    'ycsb'/# 'ycsb'/" ./build-images.sh
+        working-directory: /root/foundationdb/packaging/docker
+
+      # reason: not needed
+      - name: remove sidecar from image list
+        run: sed -i "s/    'foundationdb-kubernetes-sidecar'/# 'foundationdb-kubernetes-sidecar'/" ./build-images.sh
+        working-directory: /root/foundationdb/packaging/docker
+
+      - name: add prerelease on Docker tags
+        run: sed -i 's#image_tag="${tag_base}${image}:${fdb_version}"#image_tag="${tag_base}${image}:${fdb_version}-prerelease"#' ./build-images.sh
+        working-directory: /root/foundationdb/packaging/docker
+
+      - name: verify build-images for debugging purpose
+        run: cat ./build-images.sh
         working-directory: /root/foundationdb/packaging/docker
 
       - name: build docker images
@@ -83,6 +144,7 @@ jobs:
         working-directory: /root/foundationdb/packaging/docker
         env:
           TERM: xterm-color
+          USER: gh-action
 
       - name: list docker images
         run: docker images
@@ -146,10 +208,3 @@ jobs:
           path: /root/build_output/packages/bindingtester-*.tar.gz
           if-no-files-found: error
           retention-days: 10
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
