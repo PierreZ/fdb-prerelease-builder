@@ -81,15 +81,15 @@ jobs:
       - name: enable docker push on build-images.sh if needed
         run: sed -i 's#push_docker_images="false"#push_docker_images="true"#' build-images.sh
         working-directory: /root/foundationdb/packaging/docker
-        # if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request'
 
       - name: Login to GitHub Container Registry if needed
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: pierrez
           password: ${{ secrets.GITHUB_TOKEN }}
-        # if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request'
 
       # reason: remove required aws call even if we are not using aws
       - name: comment aws calls
