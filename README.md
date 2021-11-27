@@ -24,9 +24,11 @@ The workflow is building every week:
 
 ## Getting started with a pre-release
 
-Artifacts can be found on the [latest CI run](https://github.com/PierreZ/fdb-prerelease-builder/actions/workflows/fdb-release.yml).
+Artifacts can be found on the [latest CI run](https://github.com/PierreZ/fdb-prerelease-builder/actions/workflows/fdb-release.yml), or with the [Docker release](https://github.com/PierreZ/fdb-prerelease-builder/pkgs/container/foundationdb).
 
-### Start fdbserver manually
+### FoundationDB-server
+
+#### Start fdbserver manually
 
 ```shell
 # Download both client server targz
@@ -53,7 +55,18 @@ $ ./bin/fdbcli --exec "configure new single memory"
 $ ./bin/fdbcli --exec "status"
 ```
 
-### Use a pre-release client
+#### Use Docker
+
+```shell
+$ docker pull ghcr.io/pierrez/foundationdb:7.0.0-prerelease
+$ docker run --name fdb --rm -d -p 4500:4500 ghcr.io/pierrez/foundationdb:7.0.0-prerelease
+
+# init database
+docker exec fdb fdbcli --exec "configure new single memory"
+docker exec fdb fdbcli --exec "status"
+```
+
+### FoundationDB-clients
 
 You can either:
 
