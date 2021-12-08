@@ -73,11 +73,15 @@ jobs:
         run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja bindingtester
         working-directory: /root/build_output
 
+      - name: list size
+        run: du -skh *
+        working-directory: /root/build_output
+
       # job is hitting some disk space issues:
       # `You are running out of disk space. The runner will stop working when the machine runs out of disk space. Free space left: 0 MB`
       # We need to cleanup things to be able to build the docker image
-      - name: list size
-        run: du -skh *
+      - name: remove fdbserver folder
+        run: rm -rf fdbserver
         working-directory: /root/build_output
 
       - name: change tag for Docker
