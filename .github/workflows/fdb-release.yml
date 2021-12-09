@@ -73,6 +73,17 @@ jobs:
         run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja bindingtester
         working-directory: /root/build_output
 
+      - name: list size
+        run: du -skh *
+        working-directory: /root/build_output
+
+      # job is hitting some disk space issues:
+      # `You are running out of disk space. The runner will stop working when the machine runs out of disk space. Free space left: 0 MB`
+      # We need to cleanup things to be able to build the docker image
+      - name: remove fdbserver folder
+        run: rm -rf fdbserver
+        working-directory: /root/build_output
+
       - name: change tag for Docker
         # transform tag_base="foundationdb/" in tag_base="ghcr.io/pierrez"
         run: sed -i 's#"foundationdb/"#"ghcr.io/pierrez/"#' build-images.sh
@@ -157,7 +168,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: foundationdb-clients_${{ matrix.branch }}.PRERELEASE_amd64.deb
-          path: /root/build_output/packages/foundationdb-clients*.PRERELEASE_amd64.deb
+          path: /root/build_output/packages/foundationdb-clients*_amd64.deb
           if-no-files-found: error
           retention-days: 10
 
@@ -165,7 +176,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: foundationdb-clients_${{ matrix.branch }}.PRERELEASE.x86_64.tar.gz
-          path: /root/build_output/packages/foundationdb-clients*.PRERELEASE.x86_64.tar.gz
+          path: /root/build_output/packages/foundationdb-clients*.x86_64.tar.gz
           if-no-files-found: error
           retention-days: 10
 
@@ -173,7 +184,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: foundationdb-server_${{ matrix.branch }}.PRERELEASE_amd64.deb
-          path: /root/build_output/packages/foundationdb-server*.PRERELEASE_amd64.deb
+          path: /root/build_output/packages/foundationdb-server*_amd64.deb
           if-no-files-found: error
           retention-days: 10
 
@@ -181,7 +192,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: foundationdb-server_${{ matrix.branch }}.PRERELEASE.x86_64.tar.gz
-          path: /root/build_output/packages/foundationdb-server*.PRERELEASE.x86_64.tar.gz
+          path: /root/build_output/packages/foundationdb-server*.x86_64.tar.gz
           if-no-files-found: error
           retention-days: 10
 
@@ -196,7 +207,7 @@ jobs:
       - name: upload correctness
         uses: actions/upload-artifact@v2
         with:
-          name: foundationdb-correctness_${{ matrix.branch }}.PRERELEASE.tar.gz
+          name: foundationdb-correctness_${{ matrix.branch }}.SNAPSHOT.tar.gz
           path: /root/build_output/packages/correctness-*.tar.gz
           if-no-files-found: error
           retention-days: 10
@@ -204,7 +215,7 @@ jobs:
       - name: upload bindingtester
         uses: actions/upload-artifact@v2
         with:
-          name: bindingtester_${{ matrix.branch }}.PRERELEASE.tar.gz
+          name: bindingtester_${{ matrix.branch }}.SNAPSHOT.tar.gz
           path: /root/build_output/packages/bindingtester-*.tar.gz
           if-no-files-found: error
           retention-days: 10
