@@ -114,7 +114,7 @@ jobs:
 
       # reason: fix path
       - name: change build_output for Docker
-        run: sed -i 's#${script_dir}/../../build_output#/root/build_output#' ./build-images.sh
+        run: sed -i 's#"${script_dir}/../../"#"/root/build_output"#' ./build-images.sh
         working-directory: /root/foundationdb/packaging/docker
 
       # reason: avoid pulling release from official website and pull local builds
