@@ -21,6 +21,7 @@ The workflow is building every week:
 |-------------	|-----	|--------	|--------	|-----	|-------------	|---------------	|
 | Release 6.3 	| ✅   	| ✅      	| ✅      	| ✅   	| ✅           	| ✅             	|
 | Release 7.0 	| ✅   	| ✅      	| ✅      	| ✅   	| ✅           	| ✅             	|
+| Release 7.1 	| ✅   	| ✅      	| ✅      	| ✅   	| ✅           	| ✅             	|
 
 ## Getting started with a pre-release
 
