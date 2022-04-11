@@ -50,7 +50,18 @@ jobs:
         working-directory: /root/build_output
 
       - name: ninja
-        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja -j1
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja -j2
+        working-directory: /root/build_output
+
+      - name: list size
+        run: du -skh *
+        working-directory: /root/build_output
+
+      # job is hitting some disk space issues:
+      # `You are running out of disk space. The runner will stop working when the machine runs out of disk space. Free space left: 0 MB`
+      # We need to cleanup things to be able to build the docker image
+      - name: remove fdbserver folder
+        run: rm -rf fdbserver
         working-directory: /root/build_output
 
       - name: cpack TGZ
@@ -65,24 +76,6 @@ jobs:
         run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable &&  ninja documentation/package_html
         working-directory: /root/build_output
 
-      - name: build joshua correctness
-        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja package_tests
-        working-directory: /root/build_output
-
-      - name: build Bindingtester
-        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja bindingtester
-        working-directory: /root/build_output
-
-      - name: list size
-        run: du -skh *
-        working-directory: /root/build_output
-
-      # job is hitting some disk space issues:
-      # `You are running out of disk space. The runner will stop working when the machine runs out of disk space. Free space left: 0 MB`
-      # We need to cleanup things to be able to build the docker image
-      - name: remove fdbserver folder
-        run: rm -rf fdbserver
-        working-directory: /root/build_output
 
       - name: change tag for Docker
         # transform tag_base="foundationdb/" in tag_base="ghcr.io/pierrez"
@@ -201,21 +194,5 @@ jobs:
         with:
           name: foundationdb-docs_${{ matrix.branch }}.PRERELEASE.tar.gz
           path: /root/build_output/packages/foundationdb-docs-*.tar.gz
-          if-no-files-found: error
-          retention-days: 10
-
-      - name: upload correctness
-        uses: actions/upload-artifact@v2
-        with:
-          name: foundationdb-correctness_${{ matrix.branch }}.SNAPSHOT.tar.gz
-          path: /root/build_output/packages/correctness-*.tar.gz
-          if-no-files-found: error
-          retention-days: 10
-
-      - name: upload bindingtester
-        uses: actions/upload-artifact@v2
-        with:
-          name: bindingtester_${{ matrix.branch }}.SNAPSHOT.tar.gz
-          path: /root/build_output/packages/bindingtester-*.tar.gz
           if-no-files-found: error
           retention-days: 10
