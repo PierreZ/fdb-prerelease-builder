@@ -39,7 +39,7 @@ jobs:
         run: du -h --max-depth=1 /opt && rm -rf /opt/foundationdb
 
       - name: disk space
-        run: df -h && exit 1
+        run: df -h
 
       - name: git clone
         run: git clone https://github.com/apple/foundationdb.git
