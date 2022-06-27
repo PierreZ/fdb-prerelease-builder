@@ -17,10 +17,9 @@ The workflow is building every week:
 * Docker images
 * Joshua's tests for the bindingtester and correctness target.
 
-|             	| DEB 	| TAR.GZ 	| Docker 	| Doc 	| Correctness 	| bindingtester 	|
-|-------------	|-----	|--------	|--------	|-----	|-------------	|---------------	|
-| Release 6.3 	| ✅   	| ✅      	| ✅      	| ✅   	| ✅           	| ✅             	|
-| Release 7.0 	| ✅   	| ✅      	| ✅      	| ✅   	| ✅           	| ✅             	|
+|             	| DEB 	| TAR.GZ 	| Docker 	| Doc 	|
+|-------------	|-----	|--------	|--------	|-----	|
+| Release 7.1 	| ✅   	| ✅      	| ✅      	| ✅   	|
 
 ## Getting started with a pre-release
 
