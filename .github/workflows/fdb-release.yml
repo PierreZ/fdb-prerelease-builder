@@ -31,6 +31,16 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+
+      - name: disk space
+        run: df -h
+
+      - name: cleanup disk space
+        run: yum clean all
+
+      - name: disk space
+        run: df -h
+
       - name: git clone
         run: git clone https://github.com/apple/foundationdb.git
         working-directory: /root
