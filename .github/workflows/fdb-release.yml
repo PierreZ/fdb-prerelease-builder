@@ -33,13 +33,13 @@ jobs:
     steps:
 
       - name: disk space
-        run: df -h
+        run: rm -rf /opt/foundationdb && df -h
 
       - name: list
         run: du -h --max-depth=1 /opt && rm -rf /opt/foundationdb
 
       - name: disk space
-        run: df -h
+        run: df -h && exit 1
 
       - name: git clone
         run: git clone https://github.com/apple/foundationdb.git
