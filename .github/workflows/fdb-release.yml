@@ -36,7 +36,7 @@ jobs:
         run: df -h
 
       - name: list
-        run: du -h --max-depth=1 /opt 
+        run: du -h --max-depth=1 /opt && rm -rf /opt/foundationdb
 
       - name: disk space
         run: df -h
