@@ -35,8 +35,8 @@ jobs:
       - name: disk space
         run: df -h
 
-      - name: cleanup disk space
-        run: yum clean all
+      - name: list
+        run: du -h --max-depth=1 /
 
       - name: disk space
         run: df -h
