@@ -31,6 +31,16 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+
+      - name: disk space
+        run: rm -rf /opt/foundationdb && df -h
+
+      - name: list
+        run: du -h --max-depth=1 /opt && rm -rf /opt/foundationdb
+
+      - name: disk space
+        run: df -h
+
       - name: git clone
         run: git clone https://github.com/apple/foundationdb.git
         working-directory: /root
@@ -50,7 +60,7 @@ jobs:
         working-directory: /root/build_output
 
       - name: ninja
-        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja -j2
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja -j2 -l1
         working-directory: /root/build_output
 
       - name: list size
