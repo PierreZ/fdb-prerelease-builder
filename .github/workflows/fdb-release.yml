@@ -27,7 +27,7 @@ jobs:
 
     strategy:
       matrix:
-        branch: ["release-7.1"]
+        branch: ["release-7.1", "main"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
