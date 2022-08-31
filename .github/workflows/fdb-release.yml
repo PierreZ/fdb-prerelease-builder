@@ -56,7 +56,7 @@ jobs:
         working-directory: /root
 
       - name: cmake
-        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && cmake -G Ninja ../foundationdb
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && cmake -G Ninja ../foundationdb -DSSD_ROCKSDB_EXPERIMENTAL=FALSE -DBUILD_JAVA_BINDING=FALSE -DBUILD_RUBY_BINDING=FALSE -DBUILD_GO_BINDING=FALSE
         working-directory: /root/build_output
 
       - name: ninja
