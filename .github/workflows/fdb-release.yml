@@ -60,7 +60,7 @@ jobs:
         working-directory: /root/build_output
 
       - name: ninja
-        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja -j2 -l1
+        run: source /opt/rh/devtoolset-8/enable && source /opt/rh/rh-python38/enable && ninja -j2
         working-directory: /root/build_output
 
       - name: list size
