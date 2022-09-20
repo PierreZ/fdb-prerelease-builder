@@ -27,7 +27,7 @@ jobs:
 
     strategy:
       matrix:
-        branch: ["main"]
+        branch: ["main", "release-7.1"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -60,3 +60,11 @@ jobs:
       - name: search mako
         run: "find . | grep mako"
         working-directory: /root/build_output
+
+      - name: upload mako
+        uses: actions/upload-artifact@v2
+        with:
+          name: mako_${{ matrix.branch }}
+          path: /root/build_output/bin/mako
+          if-no-files-found: error
+          retention-days: 10
